@@ -40,6 +40,7 @@ def main(config_path):
         num_labels=num_labels,
         problem_type="multi_label_classification"
     ).to(device)
+    logger.info("Model loaded")
     
     training_args = TrainingArguments(
         output_dir=cfg["save_params"]["save_path"],
@@ -55,7 +56,8 @@ def main(config_path):
         weight_decay=cfg["train_params"]["weight_decay"],
         logging_steps=cfg["log_params"]["log_steps"],
         logging_dir=cfg["log_params"]["log_path"],
-        report_to="none"
+        report_to="none",
+        seed=cfg["train_params"]["seed"]
     )
 
     callback = LogMetricsCallback(log_every=cfg["log_params"]["log_steps"])

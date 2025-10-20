@@ -14,7 +14,7 @@ train_params:
   max_length: 512
   batch_size: 8
   accum_size: 4
-  epochs: 0.1
+  epochs: 1
   learning_rate: 0.00005
   weight_decay: 0.01
-
+  seed: 0
