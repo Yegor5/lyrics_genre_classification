@@ -9,12 +9,42 @@ features = Features({
     'labels': Sequence(Value('float32'))
 })
 
+
+def check_data_structure(dataset):
+    for column in ["lyrics", "genre"]:
+        if column not in dataset.column_names:
+            raise ValueError(f"Отсутствует обязательная колонка: {column}")
+    return True
+
+def check_data_types(dataset):
+    for i, lyric in enumerate(dataset["lyrics"]):
+        if not isinstance(lyric, str):
+            raise TypeError(f"lyrics[{i}] должен быть строкой, получен {type(lyric)}")
+        if len(lyric.strip()) == 0:
+            raise ValueError(f"lyrics[{i}] не может быть пустой строкой")
+    
+    for i, genre in enumerate(dataset["genre"]):
+        if not isinstance(genre, list):
+            raise TypeError(f"genre[{i}] должен быть списком, получен {type(genre)}")
+        if len(genre) == 0:
+            raise ValueError(f"genre[{i}] не может быть пустым списком")
+        for g in genre:
+            if not isinstance(g, str):
+                raise TypeError(f"Элемент genre[{i}] должен быть строкой, получен {type(g)}")
+    
+    return True
+
+def read_dataset(data_path):
+    data = load_dataset(data_path) 
+    check_data_structure(data)
+    check_data_types(data)
+    return data
+
 def encode_labels(example, mlb):
     example["labels"] = mlb.transform([example["genre"]])[0]
     return example
 
-def read_dataset(data_path):
-    data = load_dataset(data_path) 
+def encode_dataset(data):
     mlb = MultiLabelBinarizer()
     mlb.fit(data["train"]["genre"])
     data["train"] = data["train"].map(encode_labels, fn_kwargs={"mlb": mlb})
@@ -29,7 +59,8 @@ def convert_labels(batch):
     return batch
 
 def preproc_dataset(cfg):
-    ds, num_labels = read_dataset(cfg["data_params"]["data_path"])
+    ds = read_dataset(cfg["data_params"]["data_path"])
+    ds, num_labels = encode_dataset(ds)
     
     tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
     tokenized_ds = ds.map(tokenize_batch, remove_columns=["lyrics"], batched=True, num_proc=2, fn_kwargs={"tokenizer": tokenizer, "max_length": cfg["train_params"]["max_length"]})
