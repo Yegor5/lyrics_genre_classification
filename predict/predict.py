@@ -45,6 +45,9 @@ class PredictionProcessor:
 
             if np.any(probs < 0) or np.any(probs > 1):
                 raise ValueError("Вероятности должны быть в диапазоне [0, 1]")
+            
+            if self.label_names and len(probs) != len(self.label_names):
+                raise ValueError(f"Длина массива вероятностей ({len(probs)}) не совпадает с количеством классов")
 
             predicts = (probs >= self.threshold).astype(int)
             pred_indices = np.where(predicts == 1)[0].tolist()

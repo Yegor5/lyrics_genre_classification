@@ -79,16 +79,18 @@ def test_check_data_types_fail_genre_element_type():
         check_data_types(ds)
 
 
-def test_encode_dataset(valid_datasetdict):
-    encoded_data, num_labels = encode_dataset(valid_datasetdict)
+def test_encode_dataset(valid_dataset_train):
+    encoded_data, num_labels = encode_dataset(valid_dataset_train)
     assert "labels" in encoded_data["train"].column_names
     assert num_labels == 2
     assert isinstance(encoded_data["train"]["labels"][0][0], (int, float))
 
 
-def test_tokenize_batch(valid_dataset):
+def test_tokenize_batch(valid_dataset_train):
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    batch = tokenize_batch(valid_dataset, max_length=2, tokenizer=tokenizer)
+    encoded_data, num_labels = encode_dataset(valid_dataset_train)
+    batch_texts = {"lyrics": list(encoded_data["train"]["lyrics"])}
+    batch = tokenize_batch(batch_texts, max_length=2, tokenizer=tokenizer)
     assert "input_ids" in batch
     assert "attention_mask" in batch
     assert len(batch["input_ids"][0]) == 2

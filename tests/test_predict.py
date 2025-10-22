@@ -32,7 +32,7 @@ def test_process_prediction_basic(processor):
 
 
 def test_process_prediction_invalid_type(processor):
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         processor.process_prediction("not-an-array")
 
 
