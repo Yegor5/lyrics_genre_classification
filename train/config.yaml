@@ -9,6 +9,7 @@ save_params:
 log_params:
   log_path: "./logs"
   log_steps: 100
+  test_size: 1000
 train_params:
   model_name: "distilbert-base-multilingual-cased"
   max_length: 512

@@ -23,16 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 def main(config_path):
-    
+
     with open(config_path, "r") as f:
         cfg = yaml.safe_load(f)
     logger.info("Config loaded")
-    
+
     split, num_labels = preproc_dataset(cfg)
     train_ds = split["train"]
     val_ds = split["test"]
     logger.info("Data loaded")
-    
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -41,7 +41,7 @@ def main(config_path):
         problem_type="multi_label_classification"
     ).to(device)
     logger.info("Model loaded")
-    
+
     training_args = TrainingArguments(
         output_dir=cfg["save_params"]["save_path"],
         eval_strategy="steps",
@@ -60,7 +60,7 @@ def main(config_path):
         seed=cfg["train_params"]["seed"]
     )
 
-    callback = LogMetricsCallback(log_every=cfg["log_params"]["log_steps"])
+    callback = LogMetricsCallback(log_every=cfg["log_params"]["log_steps"], test_size=cfg["log_params"]["test_size"])
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -79,7 +79,7 @@ def main(config_path):
         model.save_pretrained(cfg["save_params"]["hf_path"])
         tokenizer.save_pretrained(cfg["save_params"]["hf_path"])
         logger.info("Model saved on hf")
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
