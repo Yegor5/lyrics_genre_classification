@@ -54,9 +54,8 @@ def read_dataset(data_path):
         logger.error("Не удалось загрузить датасет: %s", e)
         raise
     check_data_train(data)
-    data = data['train']
-    check_data_structure(data)
-    check_data_types(data)
+    check_data_structure(data["train"])
+    check_data_types(data["train"])
     return data
 
 
