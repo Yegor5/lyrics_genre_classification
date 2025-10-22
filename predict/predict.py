@@ -33,7 +33,7 @@ class PredictionProcessor:
             probs = torch.sigmoid(outputs).cpu().numpy()[0]
         return probs
     
-    def process_pred(self, probs):
+    def process_prediction(self, probs):
         try:
             if not isinstance(probs, (np.ndarray, list)):
                 raise ValueError(f"Ожидается np.ndarray или list, получен {type(probs)}")
@@ -69,7 +69,7 @@ class PredictionProcessor:
     
     def predict_single(self, text, max_length):
         probs = self.raw_predict(text, max_length)
-        return self.process_pred(probs)
+        return self.process_prediction(probs)
     
     def predict_batch(self, texts, max_length):
         results = []

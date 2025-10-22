@@ -47,7 +47,7 @@ def test_process_prediction_label_mismatch(processor):
 
 def test_preprocess_text_validation(processor):
     with pytest.raises(ValueError):
-        processor.preprocess_text("", max_length=10)
+        processor.preproc_text("", max_length=10)
 
 def test_predict_batch_with_error(processor):
     results = processor.predict_batch(["hi", ""], max_length=10)
