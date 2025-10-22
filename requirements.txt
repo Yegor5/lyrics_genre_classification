@@ -1,6 +1,6 @@
 transformers==4.42.2
 datasets==4.2.0
-torch==2.8.0+cu128
+torch==2.8.0
 scikit-learn==1.7.2
 numpy==1.26.4
 pandas==2.3.3
