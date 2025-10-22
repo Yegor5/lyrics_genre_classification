@@ -1,9 +1,9 @@
-import pytest
 import yaml
 from pathlib import Path
 
 
 CONFIG_PATH = Path(__file__).parent.parent / "train" / "config.yaml"
+
 
 def test_config_format():
     with open(CONFIG_PATH, "r") as f:
@@ -32,5 +32,6 @@ def test_config_format():
     assert "save_hf" in save_params and isinstance(save_params["save_hf"], bool)
 
     log_params = cfg["log_params"]
-    assert "log_steps" in log_params and isinstance(log_params["log_steps"], int)
+    for key in ["log_steps", "test_size"]:
+        assert key in log_params and isinstance(log_params[key], int)
     assert "log_path" in log_params and isinstance(log_params["log_path"], str)
