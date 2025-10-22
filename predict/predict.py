@@ -13,7 +13,10 @@ class PredictionProcessor:
         self.label_names = label_names
         self.threshold = threshold
         
-    def preprocess_text(self, text, max_length):
+    def preproc_text(self, text, max_length):
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("Текст должен быть непустой строкой")
+        
         encoding = self.tokenizer(
             text,
             truncation=True,
@@ -24,21 +27,24 @@ class PredictionProcessor:
         return encoding
     
     def raw_predict(self, text, max_length):
-        inputs = self.preprocess_text(text, max_length)
+        inputs = self.preproc_text(text, max_length)
         with torch.no_grad():
             outputs = self.model(**inputs).logits
             probs = torch.sigmoid(outputs).cpu().numpy()[0]
         return probs
     
-    def process_prediction(self, probs):
+    def process_pred(self, probs):
         try:
             if not isinstance(probs, (np.ndarray, list)):
-                raise ValueError(f"Ожидается np.ndarray или list, получен {type(raw_probabilities)}")
+                raise ValueError(f"Ожидается np.ndarray или list, получен {type(probs)}")
             
-            probs = np.array(raw_probs)
+            probs = np.array(probs)
 
             if probs.ndim != 1:
                 raise ValueError(f"Ожидается 1D массив, получен {probs.ndim}D")
+            
+            if np.any(probs < 0) or np.any(probs > 1):
+                raise ValueError("Вероятности должны быть в диапазоне [0, 1]")
             
             predicts = (probs >= self.threshold).astype(int)
             pred_indices = np.where(predicts == 1)[0].tolist()
@@ -63,7 +69,7 @@ class PredictionProcessor:
     
     def predict_single(self, text, max_length):
         probs = self.raw_predict(text, max_length)
-        return self.process_prediction(probs)
+        return self.process_pred(probs)
     
     def predict_batch(self, texts, max_length):
         results = []
