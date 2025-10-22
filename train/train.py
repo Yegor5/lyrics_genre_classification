@@ -45,8 +45,11 @@ def main(config_path):
     training_args = TrainingArguments(
         output_dir=cfg["save_params"]["save_path"],
         eval_strategy="steps",
-        eval_steps=50,
-        save_strategy="epoch",
+        eval_steps=100,
+        save_strategy="steps",
+        save_steps=1000,
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_accuracy",
         learning_rate=cfg["train_params"]["learning_rate"],
         per_device_train_batch_size=cfg["train_params"]["batch_size"],
         per_device_eval_batch_size=cfg["train_params"]["batch_size"],
@@ -76,8 +79,8 @@ def main(config_path):
     trainer.train()
     logger.info("Training finished")
     if cfg["save_params"]["save_hf"]:
-        model.save_pretrained(cfg["save_params"]["hf_path"])
-        tokenizer.save_pretrained(cfg["save_params"]["hf_path"])
+        model.push_to_hub(cfg["save_params"]["hf_path"])
+        tokenizer.push_to_hub(cfg["save_params"]["hf_path"])
         logger.info("Model saved on hf")
 
 
