@@ -1,6 +1,11 @@
+import logging
+
 from datasets import Dataset, Features, Sequence, Value, load_dataset
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import AutoTokenizer
+
+
+logger = logging.getLogger(__name__)
 
 
 features = Features({
@@ -9,6 +14,11 @@ features = Features({
     'labels': Sequence(Value('float32'))
 })
 
+
+def check_data_train(dataset):
+    if 'train' not in dataset:
+        raise ValueError(f"Отсутствует обязательный сплит train")
+    return True
 
 def check_data_structure(dataset):
     for column in ["lyrics", "genre"]:
@@ -35,7 +45,13 @@ def check_data_types(dataset):
     return True
 
 def read_dataset(data_path):
-    data = load_dataset(data_path) 
+    try:
+        data = load_dataset(data_path)
+    except Exception as e:
+        logger.error("Не удалось загрузить датасет: %s", e)
+        raise
+    check_data_train(data)
+    data = data['train']
     check_data_structure(data)
     check_data_types(data)
     return data
