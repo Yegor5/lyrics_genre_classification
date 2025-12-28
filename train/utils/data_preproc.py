@@ -1,9 +1,9 @@
 import logging
 
-from dataset_registry import dataset_mapping_size
-from datasets import Features, Sequence, Value, load_dataset
+from datasets import Features, Sequence, Value, load_from_disk
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import AutoTokenizer
+from utils.dataset_registry import dataset_mapping_size
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ def check_data_types(dataset):
 
 def read_dataset(data_size):
     try:
-        data = load_dataset(dataset_mapping_size[data_size])
+        data = load_from_disk(dataset_mapping_size[data_size])
     except Exception as e:
         logger.error("Не удалось загрузить датасет: %s", e)
         raise

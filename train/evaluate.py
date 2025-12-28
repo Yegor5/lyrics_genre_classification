@@ -42,9 +42,16 @@ def main(config_path):
     ).to(device)
     logger.info("Model loaded")
 
+    tmp_output_dir = '.tmp/eval'
     eval_args = TrainingArguments(
-        output_dir=cfg["eval_params"]["metrics_path"],
+        output_dir=tmp_output_dir,
         per_device_eval_batch_size=cfg["train_params"]["batch_size"],
+        do_train=False,
+        do_eval=True,
+        do_predict=False,
+        save_strategy="no",
+        logging_strategy="no",
+        report_to="none",
     )
 
     trainer = Trainer(

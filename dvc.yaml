@@ -1,28 +1,24 @@
 stages:
   prepare:
-    cmd: python train/prepare.py --config train/config.yaml
+    cmd: python train/prepare.py --config params.yaml
     deps:
-      - train/utils/data_preproc.py
-      - train/config.yaml
-      - data/raw/lyrics_genre
+      - train/prepare.py
+      - train/utils
+      - data/raw/lyrics_genre_dataset_${data_params.data_size}
     outs:
-      - data/processed
+      - data/processed/lyrics_genre_dataset_${data_params.data_size}
 
   train:
-    cmd: python train/train.py --config train/config.yaml
+    cmd: python train/train.py --config params.yaml
     deps:
-      - train/train.py
-      - train/utils
       - data/processed
-      - train/config.yaml
+      - train/train.py
     outs:
-      - models
+      - models/bert_genre_classifier_${data_params.data_size}
 
   evaluate:
-    cmd: python train/evaluate.py --config train/config.yaml
+    cmd: python train/evaluate.py --config params.yaml
     deps:
-      - models
-      - data/processed
-      - train/utils/compute_metrics.py
+      - models/bert_genre_classifier_${data_params.data_size}
     metrics:
-      - metrics.json
+      - metrics/metric_small.json

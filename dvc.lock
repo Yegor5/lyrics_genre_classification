@@ -1,0 +1,56 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python train/prepare.py --config params.yaml
+    deps:
+    - path: data/raw/lyrics_genre_dataset_small
+      hash: md5
+      md5: 19557ae512e26a125fe010d54c90e0b5.dir
+      size: 1148632617
+      nfiles: 11
+    - path: train/prepare.py
+      hash: md5
+      md5: 4d8abc0d1a3324ee4fbdc95e549563c2
+      size: 701
+    - path: train/utils
+      hash: md5
+      md5: e2bb037afd62b9b39549d64c0bd36db0.dir
+      size: 14240
+      nfiles: 8
+    outs:
+    - path: data/processed/lyrics_genre_dataset_small
+      hash: md5
+      md5: 04737b09b1c813774d55bd0c1499bb02.dir
+      size: 681737792
+      nfiles: 7
+  train:
+    cmd: python train/train.py --config params.yaml
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 416660f660bb26c5383313048209fdbb.dir
+      size: 681737792
+      nfiles: 7
+    - path: train/train.py
+      hash: md5
+      md5: 388c34324164882408d2f701c72889ca
+      size: 3420
+    outs:
+    - path: models/bert_genre_classifier_small
+      hash: md5
+      md5: ced2a6b5c7e93b0fb69527b2b84a3e85.dir
+      size: 2173207300
+      nfiles: 18
+  evaluate:
+    cmd: python train/evaluate.py --config params.yaml
+    deps:
+    - path: models/bert_genre_classifier_small
+      hash: md5
+      md5: ced2a6b5c7e93b0fb69527b2b84a3e85.dir
+      size: 2173207300
+      nfiles: 18
+    outs:
+    - path: metrics/metric_small.json
+      hash: md5
+      md5: 884e7fcc46314f8d10ea368f0b3d75cd
+      size: 313

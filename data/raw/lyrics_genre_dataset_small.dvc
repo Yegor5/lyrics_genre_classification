@@ -1,6 +1,6 @@
 outs:
-- md5: c59f6ef0d7fd6c333dc564d59e53409d.dir
-  size: 125229193
-  nfiles: 4
+- md5: 19557ae512e26a125fe010d54c90e0b5.dir
+  size: 1148632617
+  nfiles: 11
   hash: md5
   path: lyrics_genre_dataset_small
