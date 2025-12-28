@@ -1,6 +1,6 @@
 import logging
 
-from datasets import Features, Sequence, Value, load_dataset
+from datasets import Features, Sequence, Value, load_from_disk
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import AutoTokenizer
 
@@ -13,6 +13,13 @@ features = Features({
     'attention_mask': Sequence(Value('int64')),
     'labels': Sequence(Value('float32'))
 })
+
+
+dataset_mapping_size = {
+    "small": "data/raw/lyrics_genre_dataset_small",
+    "medium": "data/raw/lyrics_genre_dataset_medium",
+    "large": "data/raw/lyrics_genre_dataset_large",
+}
 
 
 def check_data_train(dataset):
@@ -47,9 +54,9 @@ def check_data_types(dataset):
     return True
 
 
-def read_dataset(data_path):
+def read_dataset(data_size):
     try:
-        data = load_dataset(data_path)
+        data = load_from_disk(dataset_mapping_size[data_size])
     except Exception as e:
         logger.error("Не удалось загрузить датасет: %s", e)
         raise
@@ -82,7 +89,7 @@ def convert_labels(batch):
 
 
 def preproc_dataset(cfg):
-    ds = read_dataset(cfg["data_params"]["data_path"])
+    ds = read_dataset(cfg["data_params"]["data_size"])
     ds, num_labels = encode_dataset(ds)
 
     tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])

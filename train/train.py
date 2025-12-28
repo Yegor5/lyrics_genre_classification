@@ -45,9 +45,9 @@ def main(config_path):
     training_args = TrainingArguments(
         output_dir=cfg["save_params"]["save_path"],
         eval_strategy="steps",
-        eval_steps=100,
+        eval_steps=cfg["eval_params"]["eval_steps"],
         save_strategy="steps",
-        save_steps=1000,
+        save_steps=cfg["save_params"]["save_steps"],
         load_best_model_at_end=True,
         metric_for_best_model="eval_accuracy",
         learning_rate=cfg["train_params"]["learning_rate"],
@@ -78,6 +78,7 @@ def main(config_path):
     logger.info("Start training model")
     trainer.train()
     logger.info("Training finished")
+    trainer.save_model(cfg["save_params"]["save_path"])
     if cfg["save_params"]["save_hf"]:
         model.push_to_hub(cfg["save_params"]["hf_path"])
         tokenizer.push_to_hub(cfg["save_params"]["hf_path"])
