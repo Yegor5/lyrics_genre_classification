@@ -20,7 +20,7 @@ def test_config_format():
         assert key in train_params and isinstance(train_params[key], float)
 
     data_params = cfg["data_params"]
-    assert "data_size" in data_params and data_params["data_path"] in ["small", "medium", "large"]
+    assert "data_size" in data_params and data_params["data_size"] in ["small", "medium", "large"]
     assert "test_size" in data_params and isinstance(data_params["test_size"], float)
     assert "seed" in data_params and isinstance(data_params["seed"], int)
 
