@@ -1,5 +1,5 @@
 data_params:
-  data_size: "small" "Yegor25/lyrics_genre_dataset_small"
+  data_size: "small"
   test_size: 0.1
   seed: 0
 save_params:
