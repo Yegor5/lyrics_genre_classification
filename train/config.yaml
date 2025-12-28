@@ -1,15 +1,17 @@
 data_params:
-  data_path: "Yegor25/lyrics_genre_dataset_small"
+  data_size: "small" "Yegor25/lyrics_genre_dataset_small"
   test_size: 0.1
   seed: 0
 save_params:
-  save_path: "./bert_genre_model"
+  save_path: "models/bert_genre_model"
   save_hf: True
   hf_path: "Yegor25/bert_genre_model"
 log_params:
   log_path: "./logs"
   log_steps: 100
   test_size: 1000
+eval_params:
+  metrics_path: "./metrics/metric_v1"
 train_params:
   model_name: "distilbert-base-multilingual-cased"
   max_length: 512

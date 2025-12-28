@@ -1,5 +1,6 @@
 import logging
 
+from dataset_registry import dataset_mapping_size
 from datasets import Features, Sequence, Value, load_dataset
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import AutoTokenizer
@@ -47,9 +48,9 @@ def check_data_types(dataset):
     return True
 
 
-def read_dataset(data_path):
+def read_dataset(data_size):
     try:
-        data = load_dataset(data_path)
+        data = load_dataset(dataset_mapping_size[data_size])
     except Exception as e:
         logger.error("Не удалось загрузить датасет: %s", e)
         raise
@@ -82,7 +83,7 @@ def convert_labels(batch):
 
 
 def preproc_dataset(cfg):
-    ds = read_dataset(cfg["data_params"]["data_path"])
+    ds = read_dataset(cfg["data_params"]["data_size"])
     ds, num_labels = encode_dataset(ds)
 
     tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])

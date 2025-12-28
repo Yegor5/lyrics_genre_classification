@@ -1,0 +1,28 @@
+stages:
+  prepare:
+    cmd: python train/prepare.py --config train/config.yaml
+    deps:
+      - train/utils/data_preproc.py
+      - train/config.yaml
+      - data/raw/lyrics_genre
+    outs:
+      - data/processed
+
+  train:
+    cmd: python train/train.py --config train/config.yaml
+    deps:
+      - train/train.py
+      - train/utils
+      - data/processed
+      - train/config.yaml
+    outs:
+      - models
+
+  evaluate:
+    cmd: python train/evaluate.py --config train/config.yaml
+    deps:
+      - models
+      - data/processed
+      - train/utils/compute_metrics.py
+    metrics:
+      - metrics.json
