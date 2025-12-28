@@ -3,7 +3,6 @@ import logging
 from datasets import Features, Sequence, Value, load_from_disk
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import AutoTokenizer
-from utils.dataset_registry import dataset_mapping_size
 
 
 logger = logging.getLogger(__name__)
@@ -14,6 +13,13 @@ features = Features({
     'attention_mask': Sequence(Value('int64')),
     'labels': Sequence(Value('float32'))
 })
+
+
+dataset_mapping_size = {
+    "small": "data/raw/lyrics_genre_dataset_small",
+    "medium": "data/raw/lyrics_genre_dataset_medium",
+    "large": "data/raw/lyrics_genre_dataset_large",
+}
 
 
 def check_data_train(dataset):
