@@ -27,7 +27,7 @@ def test_config_format():
     save_params = cfg["save_params"]
     for key in ["save_path", "hf_path"]:
         assert key in save_params and isinstance(save_params[key], str)
-    assert "save_steps" in save_params and isinstance(save_params["save_path"], int)
+    assert "save_steps" in save_params and isinstance(save_params["save_steps"], int)
     assert "save_hf" in save_params and isinstance(save_params["save_hf"], bool)
 
     log_params = cfg["log_params"]
@@ -36,5 +36,5 @@ def test_config_format():
     assert "log_path" in log_params and isinstance(log_params["log_path"], str)
     
     eval_params = cfg["eval_params"]
-    assert "eval_steps" in eval_params and isinstance(eval_params["eval_path"], int)
+    assert "eval_steps" in eval_params and isinstance(eval_params["eval_steps"], int)
     assert "metrics_path" in eval_params and isinstance(eval_params["metrics_path"], str)
