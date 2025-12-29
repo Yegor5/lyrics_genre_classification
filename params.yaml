@@ -14,6 +14,9 @@ log_params:
 eval_params:
   eval_steps: 100
   metrics_path: "metrics/metric_small.json"
+inference_params:
+  model_path: "models/bert_genre_classifier_large"
+  threshold: 0.5
 train_params:
   model_name: "distilbert-base-multilingual-cased"
   max_length: 512

@@ -61,17 +61,21 @@ def main(config_path):
             "data_seed": cfg["data_params"]["seed"],
         })
         
-        split, num_labels = preproc_dataset(cfg)
+        split, label_names = preproc_dataset(cfg)
         train_ds = split["train"]
         val_ds = split["test"]
+        id2label = {i: label for i, label in enumerate(label_names)}
+        label2id = {label: i for i, label in enumerate(label_names)}
         logger.info("Data loaded")
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
         model = AutoModelForSequenceClassification.from_pretrained(
             cfg["train_params"]["model_name"],
-            num_labels=num_labels,
-            problem_type="multi_label_classification"
+            num_labels=len(label_names),
+            problem_type="multi_label_classification",
+            id2label=id2label,
+            label2id=label2id
         ).to(device)
         logger.info("Model loaded")
 
@@ -126,7 +130,7 @@ def main(config_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True, help="path to config.yaml")
+    parser.add_argument("--config", type=str, required=True, help="path to params.yaml")
     parser.add_argument("--verbose", action="store_true", help="enable verbose logging")
 
     args = parser.parse_args()
