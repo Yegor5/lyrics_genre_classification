@@ -1,0 +1,6 @@
+outs:
+- md5: b4a8ada8bf6c66dabd5f934e2aa546f5.dir
+  size: 2173798870
+  nfiles: 18
+  hash: md5
+  path: bert_genre_classifier_large

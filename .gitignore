@@ -1,2 +1,5 @@
 .tmp
+mlruns/.trash
+mlruns/777526145379134835/42cc9b6f016847c18cf283f96fdb44f1/artifacts/model
+mlruns/777526145379134835/ee34093bcd9b4f73b3b7935ae1f7c256/artifacts/model
 train/utils/__pycache__
