@@ -57,6 +57,40 @@ python train/train.py --config params.yaml --verbose
 
 Для логирования используется mlflow, результаты обучения можно посмотреть в ui
 
+## Docker
+
+Для билда контейнера необходимо выполнить команду
+
+```sh
+docker build -t ml-app:v1 .
+```
+
+Образ считает инференс моделей для заданных текстов песен
+
+Образ принимает три аргумента: путь до файла с входными данными, путь до файла, где будут сохранены результаты, и конфиг с параметрами
+
+Пример входного файла с текстами песен и выходного файлов с результатом модели можно посмотреть в директории examples
+
+В конфиге params.yaml в секции eval_params.model_path необходимо указать путь до модели, для которой строится образ
+
+Можно обучить свою модель или же использовать следующую команду, чтобы подгрузить веса уже обученных моделей
+
+```sh
+dvc pull
+```
+
+Запустить образ можно с помощью следующей команды 
+
+```sh
+docker run --rm \
+  -v $(pwd)/examples:/app/data \
+  -v $(pwd)/params.yaml:/app/params.yaml \
+  ml-app:v1 \
+  --input_path /app/data/input.csv \
+  --output_path /app/data/output.csv \
+  --config_path /app/params.yaml
+```
+
 [датасет с kaggle]: <https://www.kaggle.com/datasets/travissscottt/ru-and-en-song-lyrics-for-genre-classification?resource=download>
 [три версии этого датасета]: <https://huggingface.co/Yegor25/datasets>
 [google drive]: <https://drive.google.com/drive/folders/1LOlyVjUEWvZVzTZTvF7opVBbVt4Cn8Ml?usp=drive_link>
