@@ -41,4 +41,4 @@ def test_config_format():
         
     inference_params = cfg["inference_params"]
     assert "threshold" in inference_params and isinstance(inference_params["threshold"], float)
-    assert "model_path" in eval_params and isinstance(eval_params["model_path"], str)
+    assert "model_path" in inference_params and isinstance(inference_params["model_path"], str)
