@@ -10,7 +10,7 @@
 
 * Для обучения был взят [датасет с kaggle], который содержит более 3 миллионов текстов песен на английском и русском языках
 * После EDA я изменил этот датасет и опубликовал [три версии этого датасета] (small, medium, large) на hf
-* Маленький датасет содержит только 3 жанра, средний 10 жанров, а большой 43 жанра, причем одна песня может принадлежать нескольким жанрам
+* Маленький датасет содержит только 3 жанра, средний 7 жанров, а большой 43 жанра, причем одна песня может принадлежать нескольким жанрам
 
 ### DVC
 * Данные и модели лежат на [google drive]
@@ -44,6 +44,7 @@ git clone https://github.com/Yegor5/lyrics_genre_classification.git
 cd lyrics_genre_classification
 pip install -r requirements.txt
 huggingface-cli login
+mlflow ui
 ```
 
 Далее запустить обучение можно командой 
@@ -52,7 +53,9 @@ huggingface-cli login
 python train/train.py --config params.yaml --verbose
 ```
 
-Параметры обучения и пути для сохранения модели, логирования обучения и загрузки датасета лежат в файле params.yaml
+Параметры обучения и пути для сохранения модели, логирования обучения и загрузки датасета необходимо указать в файле params.yaml
+
+Для логирования используется mlflow, результаты обучения можно посмотреть в ui
 
 [датасет с kaggle]: <https://www.kaggle.com/datasets/travissscottt/ru-and-en-song-lyrics-for-genre-classification?resource=download>
 [три версии этого датасета]: <https://huggingface.co/Yegor25/datasets>

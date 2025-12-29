@@ -2,6 +2,10 @@ import argparse
 import logging
 import yaml
 import torch
+import subprocess
+import mlflow
+import mlflow.transformers
+from pathlib import Path
 
 from transformers import (
     AutoTokenizer,
@@ -22,67 +26,102 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def get_dvc_hash():
+    try:
+        return subprocess.check_output(
+            ["dvc", "status", "-c"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
 def main(config_path):
 
     with open(config_path, "r") as f:
         cfg = yaml.safe_load(f)
     logger.info("Config loaded")
+    
+    mlflow.set_experiment("lyrics_genre_classification")
+    mlflow.transformers.autolog(log_models=False)
 
-    split, num_labels = preproc_dataset(cfg)
-    train_ds = split["train"]
-    val_ds = split["test"]
-    logger.info("Data loaded")
+    with mlflow.start_run():
+        
+        mlflow.log_params({
+            "model_name": cfg["train_params"]["model_name"],
+            "batch_size": cfg["train_params"]["batch_size"],
+            "learning_rate": cfg["train_params"]["learning_rate"],
+            "epochs": cfg["train_params"]["epochs"],
+            "weight_decay": cfg["train_params"]["weight_decay"],
+            "accum_size": cfg["train_params"]["accum_size"],
+            "train_seed": cfg["train_params"]["seed"],
+            "data_size": cfg["data_params"]["data_size"],
+            "test_size": cfg["data_params"]["test_size"],
+            "data_seed": cfg["data_params"]["seed"],
+        })
+        
+        split, num_labels = preproc_dataset(cfg)
+        train_ds = split["train"]
+        val_ds = split["test"]
+        logger.info("Data loaded")
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
-    model = AutoModelForSequenceClassification.from_pretrained(
-        cfg["train_params"]["model_name"],
-        num_labels=num_labels,
-        problem_type="multi_label_classification"
-    ).to(device)
-    logger.info("Model loaded")
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
+        model = AutoModelForSequenceClassification.from_pretrained(
+            cfg["train_params"]["model_name"],
+            num_labels=num_labels,
+            problem_type="multi_label_classification"
+        ).to(device)
+        logger.info("Model loaded")
 
-    training_args = TrainingArguments(
-        output_dir=cfg["save_params"]["save_path"],
-        eval_strategy="steps",
-        eval_steps=cfg["eval_params"]["eval_steps"],
-        save_strategy="steps",
-        save_steps=cfg["save_params"]["save_steps"],
-        load_best_model_at_end=True,
-        metric_for_best_model="eval_accuracy",
-        learning_rate=cfg["train_params"]["learning_rate"],
-        per_device_train_batch_size=cfg["train_params"]["batch_size"],
-        per_device_eval_batch_size=cfg["train_params"]["batch_size"],
-        gradient_accumulation_steps=cfg["train_params"]["accum_size"],
-        fp16=True,
-        num_train_epochs=cfg["train_params"]["epochs"],
-        weight_decay=cfg["train_params"]["weight_decay"],
-        logging_steps=cfg["log_params"]["log_steps"],
-        logging_dir=cfg["log_params"]["log_path"],
-        report_to="none",
-        seed=cfg["train_params"]["seed"]
-    )
+        training_args = TrainingArguments(
+            output_dir=cfg["save_params"]["save_path"],
+            eval_strategy="steps",
+            eval_steps=cfg["eval_params"]["eval_steps"],
+            save_strategy="steps",
+            save_steps=cfg["save_params"]["save_steps"],
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_accuracy",
+            learning_rate=cfg["train_params"]["learning_rate"],
+            per_device_train_batch_size=cfg["train_params"]["batch_size"],
+            per_device_eval_batch_size=cfg["train_params"]["batch_size"],
+            gradient_accumulation_steps=cfg["train_params"]["accum_size"],
+            fp16=True,
+            num_train_epochs=cfg["train_params"]["epochs"],
+            weight_decay=cfg["train_params"]["weight_decay"],
+            logging_steps=cfg["log_params"]["log_steps"],
+            logging_dir=cfg["log_params"]["log_path"],
+            report_to="mlflow",
+            seed=cfg["train_params"]["seed"]
+        )
 
-    callback = LogMetricsCallback(log_every=cfg["log_params"]["log_steps"], test_size=cfg["log_params"]["test_size"])
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_ds,
-        eval_dataset=val_ds,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-        callbacks=[callback],
-    )
-    callback.trainer = trainer
+        callback = LogMetricsCallback(log_every=cfg["log_params"]["log_steps"], test_size=cfg["log_params"]["test_size"])
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=train_ds,
+            eval_dataset=val_ds,
+            tokenizer=tokenizer,
+            compute_metrics=compute_metrics,
+            callbacks=[callback],
+        )
+        callback.trainer = trainer
 
-    logger.info("Start training model")
-    trainer.train()
-    logger.info("Training finished")
-    trainer.save_model(cfg["save_params"]["save_path"])
-    if cfg["save_params"]["save_hf"]:
-        model.push_to_hub(cfg["save_params"]["hf_path"])
-        tokenizer.push_to_hub(cfg["save_params"]["hf_path"])
-        logger.info("Model saved on hf")
+        logger.info("Start training model")
+        trainer.train()
+        logger.info("Training finished")
+        
+        trainer.save_model(cfg["save_params"]["save_path"])
+        mlflow.log_artifacts(cfg["save_params"]["save_path"], artifact_path="model")
+        if Path("dvc.lock").exists():
+            mlflow.log_artifact("dvc.lock")
+        mlflow.set_tag("dvc_data_hash", get_dvc_hash())
+        
+        if cfg["save_params"]["save_hf"]:
+            model.push_to_hub(cfg["save_params"]["hf_path"])
+            tokenizer.push_to_hub(cfg["save_params"]["hf_path"])
+            logger.info("Model saved on hf")
 
 
 if __name__ == "__main__":
