@@ -37,6 +37,8 @@ def test_config_format():
     
     eval_params = cfg["eval_params"]
     assert "eval_steps" in eval_params and isinstance(eval_params["eval_steps"], int)
-    assert "threshold" in eval_params and isinstance(eval_params["threshold"], float)
-    for key in ["metrics_path", "model_path"]:
-        assert key in eval_params and isinstance(eval_params[key], str)
+    assert "metrics_path" in eval_params and isinstance(eval_params["metrics_path"], str)
+        
+    inference_params = cfg["inference_params"]
+    assert "threshold" in inference_params and isinstance(inference_params["threshold"], float)
+    assert "model_path" in eval_params and isinstance(eval_params["model_path"], str)
