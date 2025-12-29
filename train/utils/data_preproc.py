@@ -76,7 +76,7 @@ def encode_dataset(data):
     mlb.fit(data["train"]["genre"])
     data["train"] = data["train"].map(encode_labels, fn_kwargs={"mlb": mlb})
     data["train"] = data["train"].select_columns(["lyrics", "labels"])
-    return data, len(mlb.classes_)
+    return data, mlb.classes_.tolist()
 
 
 def tokenize_batch(batch, max_length, tokenizer):
@@ -90,11 +90,11 @@ def convert_labels(batch):
 
 def preproc_dataset(cfg):
     ds = read_dataset(cfg["data_params"]["data_size"])
-    ds, num_labels = encode_dataset(ds)
+    ds, label_names = encode_dataset(ds)
 
     tokenizer = AutoTokenizer.from_pretrained(cfg["train_params"]["model_name"])
     tokenized_ds = ds.map(tokenize_batch, remove_columns=["lyrics"], batched=True, num_proc=2, fn_kwargs={"tokenizer": tokenizer, "max_length": cfg["train_params"]["max_length"]})
     tokenized_ds = tokenized_ds.map(convert_labels, features=features, batched=True, num_proc=2)
 
     split = tokenized_ds["train"].train_test_split(test_size=cfg["data_params"]["test_size"], seed=cfg["data_params"]["seed"])
-    return split, num_labels
+    return split, label_names
