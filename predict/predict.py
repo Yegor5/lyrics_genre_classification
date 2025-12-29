@@ -110,8 +110,8 @@ def main(args):
     logger.info("Data loaded")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(cfg["eval_params"]["model_path"])
-    model = AutoModelForSequenceClassification.from_pretrained(cfg["eval_params"]["model_path"])
+    tokenizer = AutoTokenizer.from_pretrained(cfg["inference_params"]["model_path"])
+    model = AutoModelForSequenceClassification.from_pretrained(cfg["inference_params"]["model_path"])
     model.to(device)
     model.eval()
     logger.info("Model loaded")
@@ -125,7 +125,7 @@ def main(args):
         model=model,
         tokenizer=tokenizer,
         label_names=label_names,
-        threshold=cfg["eval_params"]["threshold"],
+        threshold=cfg["inference_params"]["threshold"],
     )
 
     results = processor.predict_batch(

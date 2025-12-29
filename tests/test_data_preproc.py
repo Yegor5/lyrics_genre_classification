@@ -80,9 +80,9 @@ def test_check_data_types_fail_genre_element_type():
 
 
 def test_encode_dataset(valid_dataset_train):
-    encoded_data, num_labels = encode_dataset(valid_dataset_train)
+    encoded_data, label_names = encode_dataset(valid_dataset_train)
     assert "labels" in encoded_data["train"].column_names
-    assert num_labels == 2
+    assert label_names == ["pop", "rock"]
     assert isinstance(encoded_data["train"]["labels"][0][0], (int, float))
 
 
