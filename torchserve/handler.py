@@ -1,6 +1,7 @@
 import json
 import torch
 import logging
+import os
 
 from transformers import (
     AutoTokenizer, 
@@ -8,6 +9,7 @@ from transformers import (
 )
 from ts.torch_handler.base_handler import BaseHandler
 from predict.predict import PredictionProcessor
+from safetensors.torch import load_file
 
 
 logger = logging.getLogger(__name__)
@@ -19,14 +21,12 @@ class GenreHandler(BaseHandler):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model_dir = ctx.system_properties["model_dir"]
+        ser_file = ctx.manifest["model"]["serializedFile"]
         self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_dir)
-
-        state_dict = torch.load(
-            f"{model_dir}/model.pt",
-            map_location=self.device
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            model_dir,
+            state_dict=load_file(os.path.join(model_dir, ser_file))
         )
-        self.model.load_state_dict(state_dict)
         self.model.to(self.device)
         self.model.eval()
 
