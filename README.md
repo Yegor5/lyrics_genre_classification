@@ -91,6 +91,44 @@ docker run --rm \
   --config_path /app/params.yaml
 ```
 
+## Torchserve
+
+Torchserve позволяет протестировать работу модели
+
+Для начала надо подтянуть веса модели 
+
+```sh
+dvc pull
+```
+
+Далее необходимо сбилдить и запустить образ
+
+```sh
+docker build -f Dockerfile.torchserve -t mymodel-serve:v1 .
+docker run -d -p 8080:8080 -p 8081:8081 --name mymodel_container mymodel-serve:v1
+```
+
+Проверить модель можно следующей командой 
+
+```sh
+curl http://localhost:8081/models
+```
+
+Сделить предикт модели для текста можно следующей командой
+
+```sh
+curl -X POST http://localhost:8080/predictions/mymodel -d @sample_input.json
+```
+
+Файл sample_input.json должен выглядить следующим образом
+
+```json
+{
+  "text": "Can you feel my heart"
+}
+```
+
+
 [датасет с kaggle]: <https://www.kaggle.com/datasets/travissscottt/ru-and-en-song-lyrics-for-genre-classification?resource=download>
 [три версии этого датасета]: <https://huggingface.co/Yegor25/datasets>
 [google drive]: <https://drive.google.com/drive/folders/1LOlyVjUEWvZVzTZTvF7opVBbVt4Cn8Ml?usp=drive_link>

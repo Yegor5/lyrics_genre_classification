@@ -6,6 +6,14 @@ COPY model-store ./model-store
 
 COPY torchserve/config.properties ./config.properties
 
+COPY torchserve/handler.py /home/model-server/
+
+COPY predict /home/venv/lib/python3.9/site-packages/predict/
+
+COPY requirements.torchserve.txt /requirements.txt
+
+RUN pip install --no-cache-dir -r /requirements.txt
+
 EXPOSE 8080 8081
 
 CMD ["torchserve", \
